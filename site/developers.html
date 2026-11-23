@@ -69,6 +69,12 @@
           <td>The same, starting from a passport number instead of an address.</td>
         </tr>
         <tr>
+          <td class="mono">GET /api/eligibility?address=0x…&amp;minLevel=1&amp;minScore=25</td>
+          <td>A yes/no gate: does this address's passport meet your bar? At least one of
+          <span class="mono">minLevel</span> (0–4) or <span class="mono">minScore</span> (0–100)
+          is required; both may be given. Try it live in the gate playground below.</td>
+        </tr>
+        <tr>
           <td class="mono">GET /api/token/&lt;id&gt;</td>
           <td>ERC-721 metadata for a passport (the endpoint the contract's tokenURI points at).</td>
         </tr>
@@ -96,13 +102,16 @@
   "edition": "Founder",
   "level": 0,
   "levelLabel": "Passport Issued",
-  "streak": 0,
-  "bestStreak": 0,
-  "totalCheckIns": 0,
-  "agentScore": 20,
-  "scoreBreakdown": { "passport": 10, "founder": 10, "level": 0, "checkIns": 0, "bestStreak": 0 }
+  "streak": 1,
+  "bestStreak": 1,
+  "totalCheckIns": 1,
+  "agentScore": 4,
+  "scoreBreakdown": { "bestStreak": 2.86, "checkIns": 1.33 },
+  "scoreName": "AgentScore — Participation &amp; Consistency Score",
+  "scoreVersion": 1
 }</pre>
-    <p class="note">Real response shape; values captured from live chain reads on 23 Nov 2026.
+    <p class="note">Real response shape (a few bookkeeping fields trimmed); values captured from
+    live chain reads on 23 Nov 2026. Responses also carry a <span class="mono">blockNumber</span>.
     Streaks, check-ins and scores change as holders stay active — always read them fresh.</p>
   </section>
 
@@ -110,34 +119,93 @@
     <h2>Example — an active holder, and a non-holder</h2>
     <pre>curl "https://agentpass-sigma.vercel.app/api/verify?tokenId=10"
 → { "tokenId": 10, "holdsPassport": true, "founder": true, "level": 1,
-    "streak": 3, "bestStreak": 3, "totalCheckIns": 3, "agentScore": 36,
-    "scoreBreakdown": { "passport": 10, "founder": 10, "level": 10, "checkIns": 3, "bestStreak": 3 } }
+    "streak": 3, "bestStreak": 3, "totalCheckIns": 3, "agentScore": 13,
+    "scoreBreakdown": { "bestStreak": 8.57, "checkIns": 4 } }
 
 curl "https://agentpass-sigma.vercel.app/api/verify?address=0x8330249bB1249Ab31f803194F3BA4A28722bb3ee"
 → { "holdsPassport": false, "tokenId": null, "agentScore": 0,
-    "scoreBreakdown": { "passport": 0, "founder": 0, "level": 0, "checkIns": 0, "bestStreak": 0 } }</pre>
+    "scoreBreakdown": { "bestStreak": 0, "checkIns": 0 } }</pre>
     <p class="note">A non-holder is a normal 200 answer with <span class="mono">holdsPassport: false</span>
     and score 0 — not an error. Errors: 400 for a missing or malformed parameter, 404 for a
     <span class="mono">tokenId</span> that has not been minted, 502 when every public RPC is unreachable.</p>
   </section>
 
   <section>
-    <h2>AgentScore — the formula</h2>
+    <h2>AgentScore v1 — the formula</h2>
     <div class="panel">
-      <p style="margin-top:0">AgentScore is a 0–100 activity score computed <b>only</b> from the
-      fields of <span class="mono">attributesOf(uint256)</span>. The formula is fixed and public —
+      <p style="margin-top:0"><b>AgentScore — Participation &amp; Consistency Score</b> (version 1)
+      is a 0–100 score computed <b>only</b> from two fields of
+      <span class="mono">attributesOf(uint256)</span>. The formula is fixed, public and frozen —
       anyone can recompute the exact same score from raw contract reads:</p>
+      <pre>score = round( 60 × min(bestStreak, 21) / 21  +  40 × min(checkIns, 30) / 30 )</pre>
       <table>
         <tr><th>Component</th><th>Points</th><th>Source field</th></tr>
-        <tr><td>Holds a passport</td><td>10</td><td class="mono">passportOf(address) != 0</td></tr>
-        <tr><td>Founder edition</td><td>10</td><td class="mono">founder</td></tr>
-        <tr><td>Level</td><td>10 per level (max 40)</td><td class="mono">level (0–4)</td></tr>
-        <tr><td>Lifetime check-ins</td><td>1 each (max 20)</td><td class="mono">checkIns</td></tr>
-        <tr><td>Best streak</td><td>1 per day (max 20)</td><td class="mono">bestStreak</td></tr>
+        <tr><td>Best streak (consistency)</td><td>60 × streak / 21, max 60 at a 21-day best streak</td><td class="mono">bestStreak</td></tr>
+        <tr><td>Lifetime check-ins (participation)</td><td>40 × check-ins / 30, max 40 at 30 check-ins</td><td class="mono">checkIns</td></tr>
         <tr><td><b>Total</b></td><td><b>max 100</b></td><td>No passport = 0</td></tr>
       </table>
-      <p class="note" style="margin-bottom:0">AgentScore measures recorded on-chain activity only.
-      It is not a financial rating, not a credit score, and it promises nothing.</p>
+      <p>Holding a passport, the Founder edition and level earn <b>no</b> points. Founder is an
+      edition badge (returned as its own field), and level is derived from best streak by the
+      contract itself — awarding points for level as well would count the same streak twice.</p>
+      <p class="note"><b>Correction, published openly (23 Nov 2026):</b> the first draft of this
+      formula, live for a few hours on launch day — before any external project had integrated
+      the API — awarded 10 points for holding a passport, 10 for Founder and 10 per level on top
+      of per-day points, double-counting level. It was replaced the same day by the v1 formula
+      above, which is the frozen one. Every API response carries
+      <span class="mono">scoreName</span> and <span class="mono">scoreVersion</span> so consumers
+      can pin the version they rely on.</p>
+      <p class="note" style="margin-bottom:0">AgentScore measures recorded on-chain participation
+      and consistency only. It is not a trust or reputation rating, not a financial rating, not a
+      credit score, and it promises nothing.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Eligibility endpoint — the yes/no gate</h2>
+    <div class="panel">
+      <p style="margin-top:0">If you only need a decision, skip the arithmetic:
+      <span class="mono">/api/eligibility</span> compares a passport against your bar and returns
+      a single <span class="mono">eligible</span> flag. Set <span class="mono">minLevel</span>
+      (0–4), <span class="mono">minScore</span> (0–100), or both — at least one is required.</p>
+      <pre>curl "https://agentpass-sigma.vercel.app/api/eligibility?address=0xe242f296…&amp;minLevel=1"
+→ { "eligible": true, "requirements": { "minLevel": 1, "minScore": null },
+    "actual": { "holdsPassport": true, "founder": true, "tokenId": 10,
+                "level": 1, "agentScore": 13 }, "scoreVersion": 1 }
+
+curl "https://agentpass-sigma.vercel.app/api/eligibility?address=0x21351a1Aa7f55596883Bd7861D9A92Dc59f2d0D6&amp;minScore=25"
+→ { "eligible": false, "requirements": { "minLevel": null, "minScore": 25 },
+    "actual": { "holdsPassport": true, "founder": true, "tokenId": 184,
+                "level": 0, "agentScore": 4 }, "scoreVersion": 1 }</pre>
+      <p class="note" style="margin-bottom:0">An address with no passport is a normal 200 answer
+      with <span class="mono">eligible: false</span> — not an error. Errors: 400 for a missing
+      address, a malformed value, or no requirement at all; 502 when every public RPC is
+      unreachable. Responses also carry a <span class="mono">blockNumber</span>.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Gate playground — interactive demo</h2>
+    <div class="panel">
+      <p style="margin-top:0"><b>Interactive demo.</b> This widget calls the live
+      <span class="mono">/api/eligibility</span> endpoint from your browser — the same call your
+      own app would make. Paste any wallet address, set a bar, and see the gate decide.</p>
+      <p>
+        <input id="gateAddress" type="text" placeholder="Wallet address (0x…)"
+          style="width:min(430px,100%);padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:14px">
+      </p>
+      <p style="margin-top:0">
+        <label style="font-size:14px;color:var(--muted)">Min level
+          <input id="gateMinLevel" type="number" min="0" max="4" step="1" placeholder="any"
+            style="width:80px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:14px;margin:0 14px 0 6px"></label>
+        <label style="font-size:14px;color:var(--muted)">Min AgentScore
+          <input id="gateMinScore" type="number" min="0" max="100" step="1" placeholder="any"
+            style="width:80px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:14px;margin:0 14px 0 6px"></label>
+        <button id="gateBtn" type="button"
+          style="padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer;font-size:14px">Check eligibility</button>
+      </p>
+      <p class="note" id="gateResult" style="margin-bottom:0">Example: address
+      <span class="mono">0x21351a1Aa7f55596883Bd7861D9A92Dc59f2d0D6</span> (passport #184) with
+      min level 0 passes; with min score 25 it does not — yet.</p>
     </div>
   </section>
 
@@ -145,16 +213,24 @@ curl "https://agentpass-sigma.vercel.app/api/verify?address=0x8330249bB1249Ab31f
     <h2>Use it as a gate</h2>
     <div class="panel">
       <p style="margin-top:0">Example: an airdrop or mint page that requires an AgentPass at
-      level 1 or higher (best streak of 3+ days):</p>
+      level 1 or higher (best streak of 3+ days). The shortest path is the eligibility
+      endpoint:</p>
       <pre>const r = await fetch(
-  'https://agentpass-sigma.vercel.app/api/verify?address=' + userAddress
+  'https://agentpass-sigma.vercel.app/api/eligibility?address=' +
+  userAddress + '&amp;minLevel=1'
 );
 const v = await r.json();
-if (v.holdsPassport && v.level >= 1) {
+if (v.eligible) {
   // eligible — a real, active Agent ID holder
 } else {
   // not eligible yet — point them to mint + check in
 }</pre>
+      <p>Or read the raw facts from <span class="mono">/api/verify</span> and decide yourself:</p>
+      <pre>const r = await fetch(
+  'https://agentpass-sigma.vercel.app/api/verify?address=' + userAddress
+);
+const v = await r.json();
+if (v.holdsPassport && v.level >= 1) { /* eligible */ }</pre>
       <p><b>On-chain alternative:</b> if your gate lives inside a smart contract, skip the API
       and read the AgentPass contract directly —
       <span class="mono">passportOf(address)</span> (selector 0x5d1c2634) returns the tokenId
@@ -170,5 +246,51 @@ if (v.holdsPassport && v.level >= 1) {
     Source code: <a href="https://github.com/Ragilsetiyo/agentpass" target="_blank" rel="noopener">github.com/Ragilsetiyo/agentpass</a>.</p>
   </footer>
 </div>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  var btn = $('gateBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var addr = ($('gateAddress').value || '').trim();
+    var out = $('gateResult');
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
+      out.textContent = 'That does not look like a wallet address (0x + 40 hex characters).';
+      return;
+    }
+    var ml = ($('gateMinLevel').value || '').trim();
+    var ms = ($('gateMinScore').value || '').trim();
+    if (ml === '' && ms === '') {
+      out.textContent = 'Set at least one bar: a minimum level (0–4) or a minimum AgentScore (0–100).';
+      return;
+    }
+    if (ml !== '' && (!/^\d+$/.test(ml) || Number(ml) > 4)) {
+      out.textContent = 'Minimum level must be a whole number from 0 to 4.';
+      return;
+    }
+    if (ms !== '' && (!/^\d+$/.test(ms) || Number(ms) > 100)) {
+      out.textContent = 'Minimum AgentScore must be a whole number from 0 to 100.';
+      return;
+    }
+    var url = '/api/eligibility?address=' + addr +
+      (ml !== '' ? '&minLevel=' + Number(ml) : '') +
+      (ms !== '' ? '&minScore=' + Number(ms) : '');
+    out.textContent = 'Asking the gate… (live read from the contract)';
+    fetch(url).then(function (r) { return r.json(); }).then(function (v) {
+      if (v.error) { out.textContent = 'The gate answered with an error: ' + v.error; return; }
+      var a = v.actual || {};
+      if (!a.holdsPassport) {
+        out.innerHTML = '<b>NOT ELIGIBLE</b> — this address holds no AgentPass passport.';
+        return;
+      }
+      out.innerHTML = (v.eligible ? '<b>ELIGIBLE ✓</b>' : '<b>NOT ELIGIBLE</b>') +
+        ' — passport <b>#' + a.tokenId + '</b> (' + (a.founder ? 'Founder' : 'Standard') +
+        '), level ' + a.level + ', AgentScore ' + a.agentScore + ' / 100.';
+    }).catch(function () {
+      out.textContent = 'The eligibility API did not answer this time — try again.';
+    });
+  });
+})();
+</script>
 </body>
 </html>

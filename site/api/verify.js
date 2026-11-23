@@ -48,7 +48,7 @@ function basePayload(cfg) {
   };
 }
 
-function holderPayload(cfg, address, tokenId, attrs) {
+function holderPayload(cfg, address, tokenId, attrs, blockNumber) {
   const scored = lib.computeAgentScore(attrs);
   return Object.assign(basePayload(cfg), {
     address,
@@ -63,7 +63,10 @@ function holderPayload(cfg, address, tokenId, attrs) {
     totalCheckIns: Number(attrs.checkIns),
     agentScore: scored.score,
     scoreBreakdown: scored.breakdown,
-    scoreFormula: lib.SCORE_FORMULA_TEXT
+    scoreFormula: lib.SCORE_FORMULA_TEXT,
+    scoreName: lib.SCORE_NAME,
+    scoreVersion: lib.SCORE_VERSION,
+    blockNumber
   });
 }
 
@@ -85,6 +88,7 @@ module.exports = async function handler(req, res) {
   }
 
   res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300');
+  const blockNumber = await lib.getBlockNumber(cfg);
 
   // --- lookup by tokenId ---
   if (rawTokenId !== null && rawAddress === null) {
@@ -102,6 +106,7 @@ module.exports = async function handler(req, res) {
       if (result.reason === 'revert') {
         res.status(404).json(Object.assign(basePayload(cfg), {
           tokenId, holdsPassport: false, agentScore: 0,
+          scoreName: lib.SCORE_NAME, scoreVersion: lib.SCORE_VERSION, blockNumber,
           error: 'AgentPass #' + tokenId + ' has not been minted'
         }));
       } else {
@@ -109,7 +114,7 @@ module.exports = async function handler(req, res) {
       }
       return;
     }
-    res.status(200).json(holderPayload(cfg, result.attrs.owner, tokenId, result.attrs));
+    res.status(200).json(holderPayload(cfg, result.attrs.owner, tokenId, result.attrs, blockNumber));
     return;
   }
 
@@ -137,8 +142,11 @@ module.exports = async function handler(req, res) {
       bestStreak: 0,
       totalCheckIns: 0,
       agentScore: 0,
-      scoreBreakdown: { passport: 0, founder: 0, level: 0, checkIns: 0, bestStreak: 0 },
-      scoreFormula: lib.SCORE_FORMULA_TEXT
+      scoreBreakdown: { bestStreak: 0, checkIns: 0 },
+      scoreFormula: lib.SCORE_FORMULA_TEXT,
+      scoreName: lib.SCORE_NAME,
+      scoreVersion: lib.SCORE_VERSION,
+      blockNumber
     }));
     return;
   }
@@ -150,5 +158,5 @@ module.exports = async function handler(req, res) {
     res.status(502).json({ error: 'upstream RPC unavailable, try again' });
     return;
   }
-  res.status(200).json(holderPayload(cfg, address, tokenId, result.attrs));
+  res.status(200).json(holderPayload(cfg, address, tokenId, result.attrs, blockNumber));
 };

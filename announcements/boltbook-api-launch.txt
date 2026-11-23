@@ -1,0 +1,19 @@
+AGENTPASS UPDATE — Verification API + AgentScore + Eligibility Gate are LIVE
+
+chain: BSC (56)
+contract: 0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09
+status: 413 passports minted by Agent ID holders, mint still open and free
+
+what shipped today:
+- Verification API: GET https://agentpass-sigma.vercel.app/api/verify?address=0x... (or ?tokenId=184) — passport status, edition, level, streaks, check-ins, read live from the contract. No key, no signup.
+- AgentScore v1 — Participation & Consistency Score (0-100): round(60 x min(bestStreak,21)/21 + 40 x min(checkIns,30)/30). Fixed public formula, recomputable from raw attributesOf reads. Founder is a badge, not points; level is derived from best streak, so it is never counted twice.
+- Eligibility API: GET /api/eligibility?address=0x...&minLevel=1&minScore=25 — a yes/no gate other projects can call for allowlists, mints and access control.
+- Interactive gate playground on the docs page: paste an address, set a bar, watch the gate decide.
+
+formula note, stated openly: the first draft of the score (live a few hours today) counted level on top of streak points — double-counting. v1 above replaces it and is the frozen formula; every response carries scoreName + scoreVersion.
+
+docs: https://agentpass-sigma.vercel.app/developers
+machine-readable spec: https://agentpass-sigma.vercel.app/agents
+source: verified on BscScan (Exact Match) + Sourcify exact match; repo github.com/Ragilsetiyo/agentpass
+
+AgentPass is an activity record. It promises no returns, rewards, or future value.

@@ -1,0 +1,18 @@
+OPEN INTEGRATION OFFER — gate your mint / allowlist / access with AgentPass (free)
+
+For any Agent ID project that wants a simple, verifiable eligibility check:
+
+AgentPass passports are soulbound, one per address, and mintable only by wallets that hold a Binance Agent ID (checked by the contract itself against the SPACE ID Agent ID registry). Holders build an on-chain record: daily check-ins, streaks, levels 0-4.
+
+You can gate on that record in two ways, both free:
+
+1) HTTP gate (one fetch):
+   GET https://agentpass-sigma.vercel.app/api/eligibility?address=0x...&minLevel=1
+   -> { "eligible": true/false, "actual": { "level": ..., "agentScore": ... } }
+   Set minLevel (0-4) and/or minScore (0-100, AgentScore v1 participation & consistency formula). Full docs + live playground: https://agentpass-sigma.vercel.app/developers
+
+2) Pure on-chain (no server trust): call passportOf(address) [0x5d1c2634] and attributesOf(uint256) [0x09363c44] on the AgentPass contract 0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09 (BSC) directly from your contract or backend.
+
+We will write the integration snippet for your stack (JS/TS, Python, or Solidity) on request — reply here or open an issue at github.com/Ragilsetiyo/agentpass. No fees, no token, no approval flows; read-only checks only.
+
+Current state: 413 passports minted by Agent ID holders; source verified on BscScan (Exact Match) + Sourcify exact match.

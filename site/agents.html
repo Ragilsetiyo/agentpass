@@ -79,10 +79,10 @@ opening_time_note:  Also readable on-chain at any time via openingTime().
 QUOTA — FOUNDER EDITION (live)
 --------------------------------------------------------------------------------
 founder_cap:        1000 (tokenId 1..1000 = Founder edition; 1001+ = Standard)
-free_given:         <span id="lvFreeGiven">411</span>        (on-chain: freeGiven())
-free_remaining:     <span id="lvFreeRemaining">589</span>    (on-chain: freeRemaining())
-total_minted:       <span id="lvTotalMinted">411</span>      (on-chain: totalMinted())
-total_check_ins:    <span id="lvTotalCheckIns">95</span>    (on-chain: totalCheckIns())
+free_given:         <span id="lvFreeGiven">413</span>        (on-chain: freeGiven())
+free_remaining:     <span id="lvFreeRemaining">587</span>    (on-chain: freeRemaining())
+total_minted:       <span id="lvTotalMinted">413</span>      (on-chain: totalMinted())
+total_check_ins:    <span id="lvTotalCheckIns">96</span>    (on-chain: totalCheckIns())
 mint_open_now:      <span id="lvMintOpen">true</span>         (on-chain: mintOpen())
 quote_probe_now:    <span id="lvQuoteNow">quote(0x0) = 0 (price is 0)</span>
 
@@ -157,24 +157,35 @@ verify_endpoint:    GET https://agentpass-sigma.vercel.app/api/verify?address=0x
                     GET https://agentpass-sigma.vercel.app/api/verify?tokenId=184
 returns (JSON):     address, tokenId, holdsPassport, founder, edition, level,
                     levelLabel, streak, bestStreak, totalCheckIns, agentScore,
-                    scoreBreakdown, scoreFormula
+                    scoreBreakdown, scoreFormula, scoreName, scoreVersion,
+                    blockNumber
+eligibility:        GET https://agentpass-sigma.vercel.app/api/eligibility?address=0x...&minLevel=1
+                    GET .../api/eligibility?address=0x...&minScore=25 (or both)
+                    At least one of minLevel (0..4) / minScore (0..100) is
+                    required. Returns: address, eligible (bool), requirements,
+                    actual {holdsPassport, founder, tokenId, level, agentScore},
+                    scoreName, scoreVersion, blockNumber. No passport:
+                    HTTP 200 with eligible=false. Bad parameter: 400.
 no_passport:        HTTP 200 with holdsPassport=false and agentScore=0 (not an
                     error). tokenId not minted: 404. Bad parameter: 400.
                     All RPC down: 502.
 caching:            responses may be cached 60s (browser) / 300s (edge). For
                     block-fresh data inside a contract, call passportOf /
                     attributesOf on-chain directly (selectors above).
-agent_score:        0..100, computed ONLY from attributesOf fields:
-                      10  holds a passport
-                      10  Founder edition
-                      10  per level (level 0..4, max 40)
-                       1  per lifetime check-in (max 20)
-                       1  per best-streak day (max 20)
-                    No passport = 0. Fixed public formula — recomputable from
-                    raw contract reads; the API is a convenience, not a source
-                    of truth. Full docs: /developers on this site.
+agent_score:        "AgentScore — Participation & Consistency Score", version 1.
+                    0..100, computed ONLY from attributesOf fields:
+                      score = round( 60 * min(bestStreak, 21) / 21
+                                   + 40 * min(checkIns, 30) / 30 )
+                    Holding a passport, Founder edition and level earn NO
+                    points: founder is an edition badge, and level is derived
+                    from best streak, so it is never counted twice.
+                    No passport = 0. Fixed public formula, frozen at v1 —
+                    recomputable from raw contract reads; the API is a
+                    convenience, not a source of truth. Full docs:
+                    /developers on this site.
 use_as_gate:        example — require holdsPassport=true and level >= 1 for an
-                    airdrop/mint aimed at active Agent ID holders.
+                    airdrop/mint aimed at active Agent ID holders, or call
+                    /api/eligibility and read the eligible flag directly.
 
 --------------------------------------------------------------------------------
 VERDICT FOR SCREENING AGENTS
@@ -229,10 +240,10 @@ call mint() with value 0.
   "quota": {
     "founder_cap": 1000,
     "founder_token_ids": "1..1000",
-    "free_given": 411,
-    "free_remaining": 589,
-    "total_minted": 411,
-    "total_check_ins": 95,
+    "free_given": 413,
+    "free_remaining": 587,
+    "total_minted": 413,
+    "total_check_ins": 96,
     "mint_open_now": true
   },
   "functions": {
@@ -270,15 +281,27 @@ call mint() with value 0.
   "verify_api": {
     "endpoint_by_address": "https://agentpass-sigma.vercel.app/api/verify?address=0x...",
     "endpoint_by_token_id": "https://agentpass-sigma.vercel.app/api/verify?tokenId=184",
-    "returns": ["address", "tokenId", "holdsPassport", "founder", "edition", "level", "levelLabel", "streak", "bestStreak", "totalCheckIns", "agentScore", "scoreBreakdown", "scoreFormula"],
+    "returns": ["address", "tokenId", "holdsPassport", "founder", "edition", "level", "levelLabel", "streak", "bestStreak", "totalCheckIns", "agentScore", "scoreBreakdown", "scoreFormula", "scoreName", "scoreVersion", "blockNumber"],
     "no_passport_behavior": "HTTP 200, holdsPassport=false, agentScore=0",
     "caching": "public, max-age=60, s-maxage=300",
     "docs": "https://agentpass-sigma.vercel.app/developers"
   },
+  "eligibility_api": {
+    "endpoint": "https://agentpass-sigma.vercel.app/api/eligibility?address=0x...&minLevel=1&minScore=25",
+    "parameters": { "address": "required, 0x + 40 hex", "minLevel": "optional, integer 0..4", "minScore": "optional, integer 0..100", "note": "at least one of minLevel / minScore is required" },
+    "returns": ["address", "eligible", "requirements", "actual.holdsPassport", "actual.founder", "actual.tokenId", "actual.level", "actual.agentScore", "scoreName", "scoreVersion", "blockNumber"],
+    "no_passport_behavior": "HTTP 200, eligible=false",
+    "caching": "public, max-age=60, s-maxage=300",
+    "docs": "https://agentpass-sigma.vercel.app/developers"
+  },
   "agent_score": {
+    "name": "AgentScore — Participation & Consistency Score",
+    "version": 1,
     "range": "0..100",
-    "source": "attributesOf(uint256) fields only",
-    "components": { "passport": 10, "founder": 10, "level_per_level": 10, "level_max": 40, "check_ins_per_point_cap": 20, "best_streak_per_point_cap": 20 },
+    "source": "attributesOf(uint256) fields only (bestStreak, checkIns)",
+    "formula": "round(60 * min(bestStreak, 21) / 21 + 40 * min(checkIns, 30) / 30)",
+    "components": { "best_streak_points_max": 60, "best_streak_days_at_max": 21, "check_ins_points_max": 40, "check_ins_at_max": 30 },
+    "no_points_for": ["holding a passport", "Founder edition (badge only)", "level (derived from best streak; never counted twice)"],
     "no_passport": 0
   },
   "rules": {

@@ -161,46 +161,75 @@ async function getPassportOf(cfg, address) {
 }
 
 /*
- * AgentScore — a 0..100 reputation score computed ONLY from the fields of
- * attributesOf(uint256): founder, level, checkIns, bestStreak (plus the fact
- * of holding a passport at all). The formula is fixed and public, so anyone
- * can recompute the exact same score from raw contract reads:
+ * AgentScore v1 — the "Participation & Consistency Score". A 0..100 score
+ * computed ONLY from two fields of attributesOf(uint256): bestStreak and
+ * checkIns. The formula is fixed, public and frozen, so anyone can recompute
+ * the exact same score from raw contract reads:
  *
- *   passport   10 points  — the address holds a passport (soulbound, 1/address)
- *   founder    10 points  — the passport is a Founder edition (tokenId 1..1000)
- *   level      10 points per level (level 0..4, from best streak)  — max 40
- *   checkIns    1 point per lifetime check-in, capped at 20        — max 20
- *   bestStreak  1 point per day of best streak, capped at 20       — max 20
- *   TOTAL                                                            — max 100
+ *   score = round( 60 * min(bestStreak, 21) / 21
+ *                + 40 * min(checkIns, 30) / 30 )
  *
- * An address with no passport scores 0. The score measures recorded on-chain
- * activity only; it is not a financial rating and promises nothing.
+ *   bestStreak contribution — consistency: up to 60 points for a best streak
+ *                             of 21 days (the streak that earns level 4)
+ *   checkIns contribution   — participation: up to 40 points for 30 lifetime
+ *                             check-ins
+ *   TOTAL                                                        — max 100
+ *
+ * Holding a passport, the Founder edition and the level earn NO points:
+ * founder is an edition badge (reported as its own field), and level is
+ * derived from best streak by the contract itself, so awarding points for
+ * level as well would count the same streak twice. An address with no
+ * passport scores 0.
+ *
+ * Correction note (23 Nov 2026, launch day, before any external project had
+ * integrated the API): the first published draft of this formula awarded
+ * 10 points for holding a passport, 10 for Founder and 10 per level on top
+ * of per-day streak/check-in points — double-counting level, which is a
+ * pure function of best streak. That draft was replaced the same day by
+ * this v1 formula, which is the frozen one. The score measures recorded
+ * on-chain participation and consistency only; it is not a trust or
+ * reputation rating, not a financial rating, and promises nothing.
  */
-const SCORE_CAPS = { passport: 10, founder: 10, levelPerLevel: 10, checkInsCap: 20, bestStreakCap: 20 };
+const SCORE_NAME = 'AgentScore — Participation & Consistency Score';
+const SCORE_VERSION = 1;
+const SCORE_CAPS = { bestStreakDays: 21, bestStreakPoints: 60, checkInsCount: 30, checkInsPoints: 40 };
 
 function computeAgentScore(attrs) {
   if (!attrs) {
-    return {
-      score: 0,
-      breakdown: { passport: 0, founder: 0, level: 0, checkIns: 0, bestStreak: 0 }
-    };
+    return { score: 0, breakdown: { bestStreak: 0, checkIns: 0 } };
   }
+  const bestStreakPart = SCORE_CAPS.bestStreakPoints *
+    Math.min(Number(attrs.bestStreak), SCORE_CAPS.bestStreakDays) / SCORE_CAPS.bestStreakDays;
+  const checkInsPart = SCORE_CAPS.checkInsPoints *
+    Math.min(Number(attrs.checkIns), SCORE_CAPS.checkInsCount) / SCORE_CAPS.checkInsCount;
   const breakdown = {
-    passport: SCORE_CAPS.passport,
-    founder: attrs.founder ? SCORE_CAPS.founder : 0,
-    level: Number(attrs.level) * SCORE_CAPS.levelPerLevel,
-    checkIns: Math.min(Number(attrs.checkIns), SCORE_CAPS.checkInsCap),
-    bestStreak: Math.min(Number(attrs.bestStreak), SCORE_CAPS.bestStreakCap)
+    bestStreak: Math.round(bestStreakPart * 100) / 100,
+    checkIns: Math.round(checkInsPart * 100) / 100
   };
-  const score = breakdown.passport + breakdown.founder + breakdown.level +
-    breakdown.checkIns + breakdown.bestStreak;
-  return { score, breakdown };
+  return { score: Math.round(bestStreakPart + checkInsPart), breakdown };
 }
 
 const SCORE_FORMULA_TEXT =
-  'AgentScore (0-100) = 10 (holds a passport) + 10 (Founder edition) + 10 per level ' +
-  '(max 40) + 1 per lifetime check-in (max 20) + 1 per best-streak day (max 20). ' +
-  'Computed only from attributesOf(uint256); no passport = 0.';
+  'AgentScore v1 (0-100) — Participation & Consistency Score = ' +
+  'round(60 * min(bestStreak, 21) / 21 + 40 * min(checkIns, 30) / 30). ' +
+  'Computed only from attributesOf(uint256); no passport = 0. Holding a passport, ' +
+  'Founder edition and level earn no points (level is derived from best streak, ' +
+  'so it is never counted twice); founder and level are reported as separate fields.';
+
+/*
+ * Reads the current block number (eth_blockNumber) from the first RPC that
+ * answers. Returns a Number, or null when every endpoint fails — callers
+ * treat blockNumber as best-effort metadata, never as a hard dependency.
+ */
+async function getBlockNumber(cfg) {
+  for (const url of cfg.rpcUrls) {
+    try {
+      const hex = await rpcRequest(url, 'eth_blockNumber', []);
+      if (hex && hex !== '0x') return Number(BigInt(hex));
+    } catch (e) { /* try next endpoint */ }
+  }
+  return null;
+}
 
 function escapeXml(s) {
   return String(s)
@@ -326,6 +355,7 @@ module.exports = {
   loadConfig,
   getAttributes,
   getPassportOf,
+  getBlockNumber,
   computeAgentScore,
   buildMetadata,
   buildBadgeSvg,
@@ -333,6 +363,8 @@ module.exports = {
   parseTokenId,
   levelLabel,
   SCORE_FORMULA_TEXT,
+  SCORE_NAME,
+  SCORE_VERSION,
   SELECTOR_ATTRIBUTES_OF,
   SELECTOR_PASSPORT_OF
 };
