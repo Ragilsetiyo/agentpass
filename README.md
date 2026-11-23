@@ -17,7 +17,7 @@ Built for the **Binance Agent ID Hackathon** (submission deadline: 9 December 20
 | Website | https://agentpass-sigma.vercel.app |
 | Machine-readable spec | https://agentpass-sigma.vercel.app/agents |
 | Public wall | https://agentpass-sigma.vercel.app/wall |
-| Source verification | **Sourcify — exact match** (creation + runtime), matchId `59525450` |
+| Source verification | **Verified on BscScan — Exact Match** · **Sourcify exact match** (creation + runtime), matchId `59525450` |
 | Deploy transaction | `0xa3501e842499801f2ad05e8eca1fd071c5ae14ce18f5e1a15ddd45f81aa3c5ad` (19 Nov 2026) |
 | Agent ID registry checked by the contract | SPACE ID Agent ID `0x60b9262456de011f7d15a54cdd8c48baaa8b022f` |
 | Founder edition cap | 1,000 |
@@ -63,7 +63,8 @@ https://agentpass-sigma.vercel.app/agents (mirrored in `site/agents.html` and
 - `site/` — the production website (static pages, metadata/image API, config).
 - `test/` — local-chain test suite (mock Agent ID registry, runner, results).
 - `bscscan-verify/` — ready-to-use BscScan verification package (standard JSON input,
-  constructor arguments) matching the Sourcify-verified source byte-for-byte.
+  constructor arguments) matching the verified source (BscScan Exact Match ·
+  Sourcify exact match) byte-for-byte.
 - `deploy-artifacts/` — deploy transaction result and Sourcify payload/result.
 - `DESIGN.md` — product design and mechanics.
 - `TESTNET-REPORT.md` — testnet testing report.

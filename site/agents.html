@@ -24,7 +24,7 @@
 embedded JSON block carry the same facts. Every value is baked into this static page; when JavaScript
 is available, the values marked <b>live</b> are also refreshed from the contract via public BSC RPC.
 With JavaScript off, this page is still complete and correct.
-Human overview: <a href="index.html">agentpass home</a> · Live counters: <a href="wall.html">wall</a></p>
+Human overview: <a href="index.html">agentpass home</a> · Live counters: <a href="wall.html">wall</a> · Source code: <a href="https://github.com/Ragilsetiyo/agentpass" target="_blank" rel="noopener">github.com/Ragilsetiyo/agentpass</a></p>
 
 <pre id="specText">================================================================================
 AGENTPASS — MACHINE-READABLE SPECIFICATION
@@ -37,7 +37,8 @@ network:            BNB Smart Chain
 chain_id:           56
 contract_address:   0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09
 contract_explorer:  https://bscscan.com/address/0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09#code
-source_verified:    Sourcify — exact match (matchId 59525450; compiler solc 0.8.26, optimizer 200 runs)
+source_code:        https://github.com/Ragilsetiyo/agentpass
+source_verified:    Verified on BscScan — Exact Match · Sourcify exact match (matchId 59525450; compiler solc 0.8.26, optimizer 200 runs)
 metadata_base_uri:  https://agentpass-sigma.vercel.app/api/token/   (tokenURI(id) = baseURI + id)
 image_pattern:      /api/image/{id}.svg
 
@@ -78,10 +79,10 @@ opening_time_note:  Also readable on-chain at any time via openingTime().
 QUOTA — FOUNDER EDITION (live)
 --------------------------------------------------------------------------------
 founder_cap:        1000 (tokenId 1..1000 = Founder edition; 1001+ = Standard)
-free_given:         <span id="lvFreeGiven">391</span>        (on-chain: freeGiven())
-free_remaining:     <span id="lvFreeRemaining">609</span>    (on-chain: freeRemaining())
-total_minted:       <span id="lvTotalMinted">391</span>      (on-chain: totalMinted())
-total_check_ins:    <span id="lvTotalCheckIns">63</span>    (on-chain: totalCheckIns())
+free_given:         <span id="lvFreeGiven">411</span>        (on-chain: freeGiven())
+free_remaining:     <span id="lvFreeRemaining">589</span>    (on-chain: freeRemaining())
+total_minted:       <span id="lvTotalMinted">411</span>      (on-chain: totalMinted())
+total_check_ins:    <span id="lvTotalCheckIns">95</span>    (on-chain: totalCheckIns())
 mint_open_now:      <span id="lvMintOpen">true</span>         (on-chain: mintOpen())
 quote_probe_now:    <span id="lvQuoteNow">quote(0x0) = 0 (price is 0)</span>
 
@@ -170,7 +171,8 @@ call mint() with value 0.
   "chain_id": 56,
   "contract_address": "0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09",
   "contract_explorer": "https://bscscan.com/address/0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09#code",
-  "source_verified": "Sourcify — exact match (matchId 59525450)",
+  "source_code": "https://github.com/Ragilsetiyo/agentpass",
+  "source_verified": "Verified on BscScan — Exact Match · Sourcify exact match (matchId 59525450)",
   "metadata_base_uri": "https://agentpass-sigma.vercel.app/api/token/",
   "image_pattern": "/api/image/{id}.svg",
   "eligibility": {
@@ -201,10 +203,10 @@ call mint() with value 0.
   "quota": {
     "founder_cap": 1000,
     "founder_token_ids": "1..1000",
-    "free_given": 391,
-    "free_remaining": 609,
-    "total_minted": 391,
-    "total_check_ins": 63,
+    "free_given": 411,
+    "free_remaining": 589,
+    "total_minted": 411,
+    "total_check_ins": 95,
     "mint_open_now": true
   },
   "functions": {
