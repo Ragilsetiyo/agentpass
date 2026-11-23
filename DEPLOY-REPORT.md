@@ -21,3 +21,7 @@ Bukti lengkap: `~/workspace/evidence/2026-11-19-main-agentpass-deploy.md`.
 1. **Pengecualian hunt:** kontrak AgentPass `0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09` WAJIB masuk daftar pengecualian hunt — diurus parent; state.json hunt tidak disentuh run ini.
 2. Pengumuman publik (Binance Square + Boltbook alpha) — langkah terpisah, belum dilakukan run ini.
 3. Mint pertama oleh Ragil sendiri dari Agentic Wallet saat buka: **Sabtu 21 Nov 2026 20:00 WIB**.
+
+## Addendum — 23 Nov 2026
+
+**Addendum 23 Nov 2026:** verifikasi BscScan kini TERKONFIRMASI — halaman kontrak menampilkan "Source Code Verified — Exact Match" (compiler v0.8.26, optimizer 200 runs, lisensi MIT), dikonfirmasi dari screenshot pemilik 23 Nov 2026 18:29 WIB. Catatan 19 Nov di atas yang menyebut tampilan BscScan belum terkonfirmasi kini sudah terjawab; isi asli laporan di atas tidak diubah.
