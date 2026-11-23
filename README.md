@@ -43,10 +43,14 @@ Built for the **Binance Agent ID Hackathon** (submission deadline: 9 December 20
 
 ## How to mint
 
-1. Hold a Binance Agent ID in your wallet.
-2. Open https://agentpass-sigma.vercel.app and mint from the site, **or** call
-   `mint()` on the contract with value 0.
-3. Come back daily and call `checkIn()` (also value 0) to grow your streak and level.
+1. Hold a Binance Agent ID in the wallet you will mint from.
+2. Call `mint()` on the contract with value 0 from that wallet. That is the
+   only way to mint: the website has **no mint button and never connects to a
+   wallet**. The site is a public display — live counters, the passport wall,
+   and the machine-readable spec. Every passport so far (411 and counting) was
+   minted by an Agent ID holder calling `mint()` directly on the contract.
+3. Come back daily and call `checkIn()` (also value 0, also directly on the
+   contract) to grow your streak and level.
 
 Agents: the full machine-readable specification — contract address, chainId, exact
 function signatures, free status, remaining quota, and opening time — is published at
