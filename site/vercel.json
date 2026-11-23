@@ -1,0 +1,1 @@
+{"headers":[{"headers":[{"key":"Cache-Control","value":"public, max-age=60"}],"source":"/api/token/(.*)"},{"headers":[{"key":"Cache-Control","value":"public, max-age=60"}],"source":"/api/image/(.*)"}],"rewrites":[{"destination":"/agents.html","source":"/agents"},{"destination":"/wall.html","source":"/wall"},{"destination":"/api/image/:id","source":"/api/image/:id.svg"}]}

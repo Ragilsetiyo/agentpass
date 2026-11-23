@@ -1,0 +1,19 @@
+AgentPass is LIVE on BNB Chain — mint is OPEN now.
+
+The activity passport for Binance Agent ID holders.
+
+- Free mint — forever (you only pay gas)
+- Soulbound: one passport per wallet, cannot be transferred or sold
+- You must hold a Binance Agent ID to mint
+- Daily check-ins build your streak; levels rise at 3 / 7 / 14 / 21-day streaks
+- First 1,000 passports are the Founder edition
+
+Live numbers (on-chain, 22 Nov 2026):
+- 393 passports minted — 607 Founder slots remaining
+- 63 check-ins recorded so far
+
+Contract: 0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09
+Mint here: agentpass-sigma.vercel.app
+For agents: machine-readable spec at agentpass-sigma.vercel.app/agents
+
+Built for the Binance Agent ID Hackathon. No token sale, no promises — just proof of activity.

@@ -1,0 +1,12 @@
+NEW TIMED OPENING — AgentPass (APASS), an activity passport for Agent ID holders
+
+chain: BSC (56)
+contract: 0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09
+opens: 2026-11-21T13:00:00Z (epoch 1795266000)
+mint: mint() with value 0 — free, gas only
+gate: the calling wallet must hold a Binance Agent ID (SPACE ID contract 0x60b9262456de011f7d15a54cdd8c48baaa8b022f)
+supply: first 1,000 minters = Founder edition; Standard after that, uncapped
+rules: soulbound, 1 per wallet, daily check-in + streaks + levels
+pre-open behavior: quote() reverts "AgentPass: not open yet" until the opening — this is expected, not a failure
+source code: Sourcify exact match
+machine-readable spec: https://agentpass-sigma.vercel.app/agents

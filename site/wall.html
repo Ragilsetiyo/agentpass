@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentPass — Live Wall</title>
+<meta name="description" content="Live on-chain counters for AgentPass: Founder passports minted, slots remaining, total passports and total check-ins, read directly from the contract.">
+<style>
+  :root{--bg:#0b0e14;--panel:#12161f;--panel2:#171c28;--line:#232a3a;--text:#e8ecf3;
+    --muted:#9aa5b8;--accent:#f0b90b;--accent2:#3ecf8e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  header{padding:28px 0 8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .brand{font-weight:800;font-size:22px}.brand span{color:var(--accent)}
+  nav a{margin-left:18px;color:var(--muted);font-size:14px}
+  h1{font-size:32px;margin:26px 0 6px}
+  .sub{color:var(--muted);max-width:620px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:28px 0 8px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+  .stat .v{font-size:42px;font-weight:800}
+  .stat .l{color:var(--muted);font-size:13.5px;margin-top:4px}
+  .bar{height:12px;background:#0d1017;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:18px 0 8px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+  .note{color:var(--muted);font-size:13.5px}
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:20px;margin:26px 0}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;color:var(--muted);font-size:13.5px}
+  button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;
+    padding:8px 14px;cursor:pointer;font-size:13.5px}
+  button:hover{border-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Agent<span>Pass</span></div>
+    <nav><a href="index.html">Home</a><a href="agents.html">For agents: /agents →</a></nav>
+  </header>
+
+  <h1>The wall</h1>
+  <p class="sub">Every number on this page is read live from the AgentPass contract on BNB Smart
+  Chain — the same views (<span style="font-family:ui-monospace,monospace">freeGiven()</span>,
+  <span style="font-family:ui-monospace,monospace">freeRemaining()</span>,
+  <span style="font-family:ui-monospace,monospace">totalCheckIns()</span>) that any agent can call
+  directly. Nothing here is served from a private database.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="wGiven">391</div><div class="l">Founder passports minted</div></div>
+    <div class="stat"><div class="v" id="wRemaining">609</div><div class="l">Founder slots remaining</div></div>
+    <div class="stat"><div class="v" id="wMinted">391</div><div class="l">Total passports</div></div>
+    <div class="stat"><div class="v" id="wCheckIns">63</div><div class="l">Total check-ins</div></div>
+  </div>
+  <div class="bar" aria-hidden="true"><i id="wBar" style="width:39.1%"></i></div>
+  <p class="note" id="wNote">Founder edition: 391 of 1,000 minted (39.1%). Static snapshot — with JavaScript, figures refresh live from the contract.</p>
+  <p><button id="wRefresh" type="button">Refresh</button></p>
+
+  <div class="panel">
+    <p style="margin-top:0"><b>How to read this wall:</b> the Founder edition is capped at the first
+    1,000 passports. When "Founder slots remaining" reaches zero, minting continues as the Standard
+    edition — the passport, the check-ins and the levels work exactly the same. Check-ins are counted
+    once per passport per UTC day, so the check-in total only grows through real daily activity.</p>
+    <p style="margin-bottom:0">Want to verify a single passport? Call
+    <span style="font-family:ui-monospace,monospace">attributesOf(tokenId)</span> on the AgentPass
+    contract, <span style="font-family:ui-monospace,monospace">0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09</span> —
+    it returns owner, edition, current streak, best streak, check-ins and level in one read.
+    Full specification: <a href="agents.html">/agents</a>.</p>
+  </div>
+
+  <footer>
+    <p>AgentPass — built for the BNB Chain Agent ID Hackathon. An independent project, not an
+    official Binance product. Activity record only; no returns or rewards are promised.</p>
+  </footer>
+</div>
+
+<script src="assets/chain.js"></script>
+<script>
+(function () {
+  var C = window.AgentPassChain;
+  function $(id) { return document.getElementById(id); }
+
+  C.loadConfig().then(function (cfg) {
+    if (!cfg.contractAddress) {
+      $('wNote').textContent = 'The contract is not deployed yet. This wall lights up automatically once the contract address is published — no page changes needed.';
+      $('wRefresh').style.display = 'none';
+      return;
+    }
+    function read(sig) {
+      return C.ethCall(cfg, C.encodeCall(sig)).then(C.decodeUint).catch(function () { return null; });
+    }
+    function refresh() {
+      $('wNote').textContent = 'Reading from the contract…';
+      Promise.all([read('freeGiven()'), read('freeRemaining()'), read('totalMinted()'), read('totalCheckIns()')])
+        .then(function (v) {
+          if (v[0] === null) {
+            $('wNote').textContent = 'Public RPC did not answer this time. The contract is unaffected — try Refresh.';
+            return;
+          }
+          $('wGiven').textContent = C.fmt(v[0]);
+          $('wRemaining').textContent = C.fmt(v[1]);
+          $('wMinted').textContent = C.fmt(v[2]);
+          $('wCheckIns').textContent = C.fmt(v[3]);
+          var cap = BigInt(cfg.founderCap || 1000);
+          var pct = cap > 0n ? Number((v[0] * 10000n) / cap) / 100 : 0;
+          $('wBar').style.width = pct + '%';
+          $('wNote').textContent = 'Founder edition: ' + C.fmt(v[0]) + ' of ' + C.fmt(cap) +
+            ' minted (' + pct + '%). Last read: ' + new Date().toLocaleTimeString('en-GB') + '.';
+        });
+    }
+    $('wRefresh').addEventListener('click', refresh);
+    refresh();
+  });
+})();
+</script>
+</body>
+</html>

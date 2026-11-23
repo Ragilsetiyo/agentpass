@@ -1,0 +1,242 @@
+[
+ {
+  "id": "1",
+  "name": "quote() before open reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: not open yet | execution reverted: \"AgentPass: not open yet\" | execution reverted: \"AgentPass: not open yet\" (action=\"call\", data=\"0x08c379"
+ },
+ {
+  "id": "2",
+  "name": "costFor(,1) before open reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: not open yet | execution reverted: \"AgentPass: not open yet\" | execution reverted: \"AgentPass: not open yet\" (action=\"call\", data=\"0x08c379"
+ },
+ {
+  "id": "3",
+  "name": "freeGiven() before open == 0",
+  "pass": true,
+  "evidence": "0"
+ },
+ {
+  "id": "4",
+  "name": "freeRemaining() before open == 1000",
+  "pass": true,
+  "evidence": "1000"
+ },
+ {
+  "id": "5",
+  "name": "mintOpen()==false & openingTime() readable before open",
+  "pass": true,
+  "evidence": "openingTime=1795176000"
+ },
+ {
+  "id": "6",
+  "name": "mint() before open reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: not open yet | execution reverted: \"AgentPass: not open yet\" | execution reverted: \"AgentPass: not open yet\" (action=\"call\", data=\"0x08c379"
+ },
+ {
+  "id": "7",
+  "name": "quote() after open == 0",
+  "pass": true,
+  "evidence": "0"
+ },
+ {
+  "id": "8",
+  "name": "costFor(,1) after open == 0",
+  "pass": true,
+  "evidence": "0"
+ },
+ {
+  "id": "9",
+  "name": "costFor(,2) reverts one-per-agent",
+  "pass": true,
+  "evidence": "reverted: AgentPass: one per agent | execution reverted: \"AgentPass: one per agent\" | execution reverted: \"AgentPass: one per agent\" (action=\"call\", data=\"0x08c"
+ },
+ {
+  "id": "10",
+  "name": "mint() without Agent ID reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: Agent ID required | execution reverted: \"AgentPass: Agent ID required\" | execution reverted: \"AgentPass: Agent ID required\" (action=\"call\","
+ },
+ {
+  "id": "10b",
+  "name": "mock Agent ID granted to EOA (balanceOf=1)",
+  "pass": true,
+  "evidence": "1"
+ },
+ {
+  "id": "11",
+  "name": "mint() with value reverts (non-payable)",
+  "pass": true,
+  "evidence": "reverted: require(false) | execution reverted (no data present; likely require(false) occurred | execution reverted (no data present; likely require(false) occu"
+ },
+ {
+  "id": "12",
+  "name": "mint() with Agent ID succeeds, tokenId 1, Founder event",
+  "pass": true,
+  "evidence": "tx=0x7d2cbfd85d3277d8c09ca9d44e330cb10d7f13d8c22d1354b9eeaf8bf22e6cfd founder=true"
+ },
+ {
+  "id": "12b",
+  "name": "ownerOf(1)==EOA, balanceOf==1, hasPassport, passportOf==1",
+  "pass": true,
+  "evidence": "owner=0x8330249bB1249Ab31f803194F3BA4A28722bb3ee"
+ },
+ {
+  "id": "13",
+  "name": "freeGiven()==1 & freeRemaining()==999 after first mint",
+  "pass": true,
+  "evidence": "given=1 rem=999"
+ },
+ {
+  "id": "14",
+  "name": "double mint reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: already has passport | execution reverted: \"AgentPass: already has passport\" | execution reverted: \"AgentPass: already has passport\" (actio"
+ },
+ {
+  "id": "15",
+  "name": "first checkIn succeeds, streak 1",
+  "pass": true,
+  "evidence": "tx=0x2dc3947773e49c0ee6e0db158f932c00668a70a7332d4b873e254271584222a0"
+ },
+ {
+  "id": "16",
+  "name": "second checkIn same day reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: already checked in today | execution reverted: \"AgentPass: already checked in today\" | execution reverted: \"AgentPass: already checked in t"
+ },
+ {
+  "id": "17",
+  "name": "checkIn without passport reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: no passport | execution reverted: \"AgentPass: no passport\" | execution reverted: \"AgentPass: no passport\" (action=\"call\", data=\"0x08c379a00"
+ },
+ {
+  "id": "18",
+  "name": "checkIn with value reverts (non-payable)",
+  "pass": true,
+  "evidence": "reverted: require(false) | execution reverted (no data present; likely require(false) occurred | execution reverted (no data present; likely require(false) occu"
+ },
+ {
+  "id": "19",
+  "name": "next-day checkIn: streak 2",
+  "pass": true,
+  "evidence": "streak=2"
+ },
+ {
+  "id": "20",
+  "name": "after skipped day: streak resets to 1, bestStreak stays 2",
+  "pass": true,
+  "evidence": "streak=1 best=2"
+ },
+ {
+  "id": "21",
+  "name": "level at best streak 3 == 1",
+  "pass": true,
+  "evidence": "level=1"
+ },
+ {
+  "id": "22",
+  "name": "level at best streak 7 == 2",
+  "pass": true,
+  "evidence": "level=2"
+ },
+ {
+  "id": "23",
+  "name": "level at best streak 14 == 3",
+  "pass": true,
+  "evidence": "level=3"
+ },
+ {
+  "id": "24",
+  "name": "level at best streak 21 == 4",
+  "pass": true,
+  "evidence": "level=4"
+ },
+ {
+  "id": "25",
+  "name": "attributesOf(1) consistent (founder, best 21, level 4, 23 check-ins)",
+  "pass": true,
+  "evidence": "checkIns=23 best=21 level=4"
+ },
+ {
+  "id": "26",
+  "name": "tokenURI(1) == baseURI+1",
+  "pass": true,
+  "evidence": "https://agentpass.example/pass/1"
+ },
+ {
+  "id": "27",
+  "name": "supportsInterface ERC721/ERC165",
+  "pass": true,
+  "evidence": ""
+ },
+ {
+  "id": "28",
+  "name": "transferFrom reverts soulbound",
+  "pass": true,
+  "evidence": "reverted: AgentPass: soulbound | execution reverted: \"AgentPass: soulbound\" | execution reverted: \"AgentPass: soulbound\" (action=\"call\", data=\"0x08c379a00000000"
+ },
+ {
+  "id": "29",
+  "name": "safeTransferFrom(3-arg) reverts soulbound",
+  "pass": true,
+  "evidence": "reverted: AgentPass: soulbound | execution reverted: \"AgentPass: soulbound\" | execution reverted: \"AgentPass: soulbound\" (action=\"call\", data=\"0x08c379a00000000"
+ },
+ {
+  "id": "30",
+  "name": "safeTransferFrom(4-arg) reverts soulbound",
+  "pass": true,
+  "evidence": "reverted: AgentPass: soulbound | execution reverted: \"AgentPass: soulbound\" | execution reverted: \"AgentPass: soulbound\" (action=\"call\", data=\"0x08c379a00000000"
+ },
+ {
+  "id": "31b",
+  "name": "approve() recorded (getApproved == other)",
+  "pass": true,
+  "evidence": "0x976EA74026E726554dB657fA54763abd0C3a0aa9"
+ },
+ {
+  "id": "31",
+  "name": "transfer by approved still reverts soulbound",
+  "pass": true,
+  "evidence": "reverted: AgentPass: soulbound | execution reverted: \"AgentPass: soulbound\" | execution reverted: \"AgentPass: soulbound\" (action=\"call\", data=\"0x08c379a00000000"
+ },
+ {
+  "id": "32",
+  "name": "transfer by operator still reverts soulbound",
+  "pass": true,
+  "evidence": "reverted: AgentPass: soulbound | execution reverted: \"AgentPass: soulbound\" | execution reverted: \"AgentPass: soulbound\" (action=\"call\", data=\"0x08c379a00000000"
+ },
+ {
+  "id": "36",
+  "name": "balanceOf(zero address) reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: zero address | execution reverted: \"AgentPass: zero address\" | execution reverted: \"AgentPass: zero address\" (action=\"call\", data=\"0x08c379"
+ },
+ {
+  "id": "37",
+  "name": "ownerOf(nonexistent) reverts",
+  "pass": true,
+  "evidence": "reverted: AgentPass: no such token | execution reverted: \"AgentPass: no such token\" | execution reverted: \"AgentPass: no such token\" (action=\"call\", data=\"0x08c"
+ },
+ {
+  "id": "33",
+  "name": "tokenId 1000 is Founder; freeGiven==1000, freeRemaining==0 at cap",
+  "pass": true,
+  "evidence": "tx1000=0x69436d0380fbb5569dd996ec8711ed9c1953bebeea1c1fc0df1775de39b731de"
+ },
+ {
+  "id": "34",
+  "name": "tokenId 1001 mints, isFounder == false",
+  "pass": true,
+  "evidence": "tx1001=0xc9ec571d118d7013e1ded50d7c1de6fcc3482cad7d72196e315950bb958ca4b7"
+ },
+ {
+  "id": "35",
+  "name": "after Founder quota exhausted: quote/costFor still 0, counters capped",
+  "pass": true,
+  "evidence": "given=1000 rem=0"
+ }
+]

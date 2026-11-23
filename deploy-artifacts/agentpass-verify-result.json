@@ -1,0 +1,34 @@
+{
+ "https://bsc-dataseed.binance.org": {
+  "rpc": "https://bsc-dataseed.binance.org",
+  "codeBytes": 5372,
+  "codeSha256": "e0481a5e84b28e3a84a8b22d6cc6edfc380d0deb0e73e0d25705782f936ed8ab",
+  "codeMatches": false,
+  "agentId": "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F",
+  "openingTime": "1795266000",
+  "founderCap": "1000",
+  "name": "AgentPass",
+  "symbol": "APASS",
+  "freeRemaining": "1000",
+  "freeGiven": "0",
+  "totalMinted": "0",
+  "mintOpen": false,
+  "quote": "REVERT: AgentPass: not open yet"
+ },
+ "https://bsc-rpc.publicnode.com": {
+  "rpc": "https://bsc-rpc.publicnode.com",
+  "codeBytes": 5372,
+  "codeSha256": "e0481a5e84b28e3a84a8b22d6cc6edfc380d0deb0e73e0d25705782f936ed8ab",
+  "codeMatches": false,
+  "agentId": "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F",
+  "openingTime": "1795266000",
+  "founderCap": "1000",
+  "name": "AgentPass",
+  "symbol": "APASS",
+  "freeRemaining": "1000",
+  "freeGiven": "0",
+  "totalMinted": "0",
+  "mintOpen": false,
+  "quote": "REVERT: AgentPass: not open yet"
+ }
+}

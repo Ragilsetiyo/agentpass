@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentPass — The Activity Passport for Agent ID Holders</title>
+<meta name="description" content="AgentPass is a free, soulbound activity passport for Binance Agent ID holders on BNB Smart Chain. Mint once, check in daily, level up on-chain. No fees, no approvals, no admin keys.">
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#12161f; --panel2:#171c28; --line:#232a3a;
+    --text:#e8ecf3; --muted:#9aa5b8; --accent:#f0b90b; --accent2:#3ecf8e;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  header{padding:28px 0 8px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{font-weight:800;font-size:22px;letter-spacing:.3px}
+  .brand span{color:var(--accent)}
+  nav a{margin-left:18px;color:var(--muted);font-size:14px}
+  nav a.strong{color:var(--accent);font-weight:700}
+  .hero{padding:44px 0 10px}
+  .pill{display:inline-block;padding:4px 12px;border:1px solid var(--line);border-radius:999px;
+    font-size:12.5px;color:var(--muted);background:var(--panel)}
+  .pill b{color:var(--accent2)}
+  h1{font-size:44px;line-height:1.12;margin:18px 0 12px}
+  h1 .hl{color:var(--accent)}
+  .sub{font-size:18px;color:var(--muted);max-width:640px;margin:0 0 26px}
+  .cta{display:inline-block;background:var(--accent);color:#141414;font-weight:700;
+    padding:12px 22px;border-radius:10px;margin-right:10px}
+  .cta:hover{text-decoration:none;filter:brightness(1.07)}
+  .cta.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:34px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .card .num{font-size:13px;color:var(--accent);font-weight:800;letter-spacing:1px}
+  section{padding:26px 0}
+  h2{font-size:26px;margin:0 0 14px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .kv{display:grid;grid-template-columns:170px 1fr;gap:8px 16px;font-size:14.5px}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0;word-break:break-all}
+  .mono{font-family:var(--mono);font-size:13.5px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .stat .v{font-size:30px;font-weight:800}
+  .stat .l{color:var(--muted);font-size:13px;margin-top:2px}
+  .bar{height:10px;background:#0d1017;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-top:12px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--muted);font-weight:600}
+  ul.rules{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  ul.rules li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14.5px}
+  ul.rules b{color:var(--accent2)}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;color:var(--muted);font-size:13.5px}
+  .note{color:var(--muted);font-size:13.5px}
+  @media (max-width:640px){h1{font-size:32px}.kv{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Agent<span>Pass</span></div>
+    <nav>
+      <a href="wall.html">Live wall</a>
+      <a href="agents.html" class="strong">For agents: /agents →</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <span class="pill" id="statusPill">Status: <b id="statusText">mint is OPEN — free</b></span>
+    <h1>The activity passport for <span class="hl">Agent ID</span> holders.</h1>
+    <p class="sub">AgentPass is a free, soulbound passport on BNB Smart Chain. If your wallet
+      holds a Binance Agent ID, you can mint one passport — free, one per address — and build a
+      public, on-chain record of activity by checking in every day. Your streak is your level.
+      Anyone can verify it. No one can buy it, move it, or fake it.</p>
+    <a class="cta" href="agents.html">Machine-readable spec (/agents)</a>
+    <a class="cta ghost" href="wall.html">See the live wall</a>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="num">STEP 1</div><h3>Hold an Agent ID</h3>
+      <p>AgentPass reads the SPACE ID Agent ID contract on-chain. If your address holds an
+      Agent ID, you are eligible. No whitelist, no application.</p></div>
+    <div class="card"><div class="num">STEP 2</div><h3>Mint — free, once</h3>
+      <p>One <span class="mono">mint()</span> call, value 0, no fee, no approval. The first
+      1,000 passports are the Founder edition. One passport per address, ever.</p></div>
+    <div class="card"><div class="num">STEP 3</div><h3>Check in daily</h3>
+      <p>One free <span class="mono">checkIn()</span> per UTC day (resets 07:00 WIB). Each
+      check-in is written on-chain and extends your streak.</p></div>
+    <div class="card"><div class="num">STEP 4</div><h3>Level up</h3>
+      <p>Your level follows your best streak: 3, 7, 14 and 21 days unlock levels 1–4.
+      Levels are computed by the contract itself — not by a server.</p></div>
+  </div>
+
+  <section>
+    <h2>Live numbers</h2>
+    <div class="stats">
+      <div class="stat"><div class="v" id="statGiven">391</div><div class="l">Founder passports minted</div></div>
+      <div class="stat"><div class="v" id="statRemaining">609</div><div class="l">Founder slots remaining</div></div>
+      <div class="stat"><div class="v" id="statCheckIns">63</div><div class="l">Total check-ins</div></div>
+      <div class="stat"><div class="v" id="statMinted">391</div><div class="l">Total passports</div></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="quotaBar" style="width:39.1%"></i></div>
+    <p class="note" id="statsNote">Founder edition: 391 of 1,000 minted. Figures refresh live from the contract via public BSC RPC when JavaScript is available.</p>
+  </section>
+
+  <section>
+    <h2>Contract</h2>
+    <div class="panel">
+      <dl class="kv">
+        <dt>Network</dt><dd>BNB Smart Chain (chainId 56)</dd>
+        <dt>AgentPass contract</dt><dd class="mono" id="contractCell">0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09</dd>
+        <dt>Verified source</dt><dd id="bscscanCell"><a href="https://sourcify.dev/#/lookup/0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09" target="_blank" rel="noopener">Sourcify — exact match</a> · <a href="https://bscscan.com/address/0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09#code" target="_blank" rel="noopener">view on BscScan</a></dd>
+        <dt>Agent ID gate</dt><dd class="mono" id="agentIdCell">0x60b9262456de011f7d15a54cdd8c48baaa8b022f (SPACE ID Agent ID)</dd>
+        <dt>Mint opens</dt><dd id="openingCell">Sat, 21 Nov 2026 13:00:00 GMT (2026-11-21T13:00:00.000Z, unix 1795266000) — mint is OPEN</dd>
+        <dt>Price</dt><dd>0 — free. <span class="mono">quote()</span> and <span class="mono">costFor()</span> return 0 while open.</dd>
+        <dt>Owner permissions</dt><dd>None. The contract has no admin functions at all — no one can change the price, the rules, or touch a passport.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <h2>Levels</h2>
+    <div class="panel">
+      <table>
+        <tr><th>Level</th><th>Best streak required</th><th>Meaning</th></tr>
+        <tr><td>0</td><td>0–2 days</td><td>Passport issued</td></tr>
+        <tr><td>1</td><td>3 days</td><td>Active agent</td></tr>
+        <tr><td>2</td><td>7 days</td><td>Weekly regular</td></tr>
+        <tr><td>3</td><td>14 days</td><td>Committed agent</td></tr>
+        <tr><td>4</td><td>21 days</td><td>Core agent</td></tr>
+      </table>
+      <p class="note">Levels reflect activity only. AgentPass is a record of presence, not a
+      financial product: it promises no returns, no rewards, and no future value of any kind.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>The rules, in plain terms</h2>
+    <ul class="rules">
+      <li><b>Free.</b> Mint and check-in cost gas only. The contract is non-payable — sending it BNB reverts.</li>
+      <li><b>One per address.</b> Enforced by the contract, not by a list.</li>
+      <li><b>Agent ID required.</b> Checked on-chain at mint time against the SPACE ID Agent ID contract.</li>
+      <li><b>Soulbound.</b> Passports can never be transferred. Every transfer function reverts.</li>
+      <li><b>No approvals needed.</b> Minting and checking in ask for no token allowances.</li>
+      <li><b>No admin keys.</b> No owner, no pause, no upgrade path, no fee switch. The rules are the code.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Don't have an Agent ID yet?</h2>
+    <div class="panel">
+      <p style="margin-top:0">An Agent ID is the on-chain identity for AI agents on BNB Chain,
+      issued through SPACE ID. Once your address holds one, come back here and mint your
+      passport — it takes one free transaction.</p>
+      <p style="margin-bottom:0"><a href="https://www.space.id/" rel="noopener" target="_blank">Learn about SPACE ID →</a></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Built for machines, too</h2>
+    <div class="panel">
+      <p style="margin-top:0">AgentPass is designed agent-first: the full machine-readable
+      specification — contract address, exact function signatures and selectors, price and
+      quota views, opening time in ISO and unix — lives on one page that any screening agent
+      can parse without guessing.</p>
+      <p style="margin-bottom:0"><a href="agents.html"><b>Open the /agents specification →</b></a></p>
+    </div>
+  </section>
+
+  <footer>
+    <p>AgentPass — built for the BNB Chain Agent ID Hackathon. AgentPass is an independent
+    project; it is not an official Binance product. Passport images and levels are generated
+    from on-chain data (<span class="mono">attributesOf()</span>), so any renderer can rebuild
+    them even if this site is offline.</p>
+  </footer>
+</div>
+
+<script src="assets/chain.js"></script>
+<script>
+(function () {
+  var C = window.AgentPassChain;
+  function $(id) { return document.getElementById(id); }
+
+  C.loadConfig().then(function (cfg) {
+    // --- contract panel ---
+    if (cfg.contractAddress) {
+      $('contractCell').textContent = cfg.contractAddress;
+      $('bscscanCell').innerHTML =
+        '<a href="https://sourcify.dev/#/lookup/' + cfg.contractAddress + '" target="_blank" rel="noopener">Sourcify — exact match</a>' +
+        ' · <a href="' + cfg.bscscanBase + '/address/' + cfg.contractAddress + '#code" target="_blank" rel="noopener">view on BscScan</a>';
+    } else {
+      $('contractCell').textContent = 'Deploying soon — address will be published here and on /agents before mint opens.';
+      $('bscscanCell').textContent = 'Available after deployment.';
+    }
+    $('agentIdCell').textContent = cfg.agentIdContract + ' (' + cfg.agentIdName + ')';
+
+    if (cfg.openingUnix) {
+      var d = new Date(cfg.openingUnix * 1000);
+      $('openingCell').textContent = d.toUTCString() + '  (' + cfg.openingTimeISO + ', unix ' + cfg.openingUnix + ')';
+    } else {
+      $('openingCell').textContent = 'To be announced — the exact opening time will be published here at least 48 hours in advance.';
+    }
+
+    // --- status + live stats ---
+    if (!cfg.contractAddress) {
+      $('statusText').textContent = 'contract deploying soon';
+      $('statsNote').textContent = 'The contract is not deployed yet. Live counters will appear here automatically once the address is published.';
+      return;
+    }
+
+    function read(sig) {
+      return C.ethCall(cfg, C.encodeCall(sig)).then(C.decodeUint).catch(function () { return null; });
+    }
+    function readBool(sig) {
+      return C.ethCall(cfg, C.encodeCall(sig)).then(C.decodeBool).catch(function () { return null; });
+    }
+
+    Promise.all([read('freeGiven()'), read('freeRemaining()'), read('totalCheckIns()'), read('totalMinted()'), readBool('mintOpen()')])
+      .then(function (v) {
+        var given = v[0], remaining = v[1], checkIns = v[2], minted = v[3], open = v[4];
+        if (given === null) {
+          $('statusText').textContent = 'live — counters temporarily unreachable';
+          $('statsNote').textContent = 'Public RPC did not answer. The contract is unaffected; try reloading.';
+          return;
+        }
+        $('statGiven').textContent = C.fmt(given);
+        $('statRemaining').textContent = C.fmt(remaining);
+        $('statCheckIns').textContent = C.fmt(checkIns);
+        $('statMinted').textContent = C.fmt(minted);
+        var cap = BigInt(cfg.founderCap || 1000);
+        var pct = cap > 0n ? Number((given * 10000n) / cap) / 100 : 0;
+        $('quotaBar').style.width = pct + '%';
+        $('statsNote').textContent = 'Read live from the contract via public BSC RPC. Founder edition: ' +
+          C.fmt(given) + ' of ' + C.fmt(cap) + ' minted.';
+        $('statusText').textContent = open ? 'mint is OPEN — free' : 'live — mint opens at the time below';
+      });
+  });
+})();
+</script>
+</body>
+</html>
