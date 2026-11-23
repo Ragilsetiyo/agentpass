@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentPass — Verification API &amp; AgentScore (Developers)</title>
+<meta name="description" content="Developer documentation for the AgentPass verification API: check whether any address holds an AgentPass passport, read its level and streaks, and get its AgentScore — all from live on-chain data. Free, no API key.">
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#12161f; --panel2:#171c28; --line:#232a3a;
+    --text:#e8ecf3; --muted:#9aa5b8; --accent:#f0b90b; --accent2:#3ecf8e;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  header{padding:28px 0 8px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{font-weight:800;font-size:22px;letter-spacing:.3px}
+  .brand span{color:var(--accent)}
+  nav a{margin-left:18px;color:var(--muted);font-size:14px}
+  h1{font-size:34px;line-height:1.15;margin:26px 0 10px}
+  h2{font-size:24px;margin:0 0 12px}
+  section{padding:24px 0}
+  .sub{font-size:17px;color:var(--muted);max-width:680px;margin:0 0 8px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .mono{font-family:var(--mono);font-size:13.5px}
+  pre{background:#10141d;border:1px solid var(--line);border-radius:10px;padding:16px;
+    overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  .note{color:var(--muted);font-size:13.5px}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;color:var(--muted);font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Agent<span>Pass</span></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="wall.html">Live wall</a>
+      <a href="agents.html">For agents: /agents →</a>
+    </nav>
+  </header>
+
+  <h1>Verification API &amp; AgentScore</h1>
+  <p class="sub">AgentPass passports are public, soulbound and fully on-chain — so any project
+    can verify them. This API lets your app, airdrop, mint or agent check, in one call:
+    <b>does this address hold an AgentPass, at what level, and what is its AgentScore?</b>
+    Free, read-only, no API key, no signup.</p>
+
+  <section>
+    <h2>Endpoint</h2>
+    <div class="panel">
+      <table>
+        <tr><th style="width:300px">Call</th><th>What it answers</th></tr>
+        <tr>
+          <td class="mono">GET /api/verify?address=0x…</td>
+          <td>Passport status, edition, level, streaks, check-ins and AgentScore for a wallet address.</td>
+        </tr>
+        <tr>
+          <td class="mono">GET /api/verify?tokenId=184</td>
+          <td>The same, starting from a passport number instead of an address.</td>
+        </tr>
+        <tr>
+          <td class="mono">GET /api/token/&lt;id&gt;</td>
+          <td>ERC-721 metadata for a passport (the endpoint the contract's tokenURI points at).</td>
+        </tr>
+      </table>
+      <p class="note">Base URL: <span class="mono">https://agentpass-sigma.vercel.app</span>.
+      Every answer is read live from the AgentPass contract on BNB Smart Chain
+      (<span class="mono">passportOf</span> + <span class="mono">attributesOf</span>) via public BSC RPC.
+      Responses may be cached up to 60 seconds by browsers and 300 seconds at the edge, so a
+      cached answer can lag the chain by a few minutes. If you need block-fresh data inside a
+      smart contract, call the contract views directly — see “On-chain alternative” below.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Example — a passport holder</h2>
+    <pre>curl "https://agentpass-sigma.vercel.app/api/verify?address=0x21351a1Aa7f55596883Bd7861D9A92Dc59f2d0D6"</pre>
+    <pre>{
+  "project": "AgentPass",
+  "contract": "0x2CaB70C426F92C0d08aEb7cFe41b27b746feEb09",
+  "chainId": 56,
+  "address": "0x21351a1aa7f55596883bd7861d9a92dc59f2d0d6",
+  "tokenId": 184,
+  "holdsPassport": true,
+  "founder": true,
+  "edition": "Founder",
+  "level": 0,
+  "levelLabel": "Passport Issued",
+  "streak": 0,
+  "bestStreak": 0,
+  "totalCheckIns": 0,
+  "agentScore": 20,
+  "scoreBreakdown": { "passport": 10, "founder": 10, "level": 0, "checkIns": 0, "bestStreak": 0 }
+}</pre>
+    <p class="note">Real response shape; values captured from live chain reads on 23 Nov 2026.
+    Streaks, check-ins and scores change as holders stay active — always read them fresh.</p>
+  </section>
+
+  <section>
+    <h2>Example — an active holder, and a non-holder</h2>
+    <pre>curl "https://agentpass-sigma.vercel.app/api/verify?tokenId=10"
+→ { "tokenId": 10, "holdsPassport": true, "founder": true, "level": 1,
+    "streak": 3, "bestStreak": 3, "totalCheckIns": 3, "agentScore": 36,
+    "scoreBreakdown": { "passport": 10, "founder": 10, "level": 10, "checkIns": 3, "bestStreak": 3 } }
+
+curl "https://agentpass-sigma.vercel.app/api/verify?address=0x8330249bB1249Ab31f803194F3BA4A28722bb3ee"
+→ { "holdsPassport": false, "tokenId": null, "agentScore": 0,
+    "scoreBreakdown": { "passport": 0, "founder": 0, "level": 0, "checkIns": 0, "bestStreak": 0 } }</pre>
+    <p class="note">A non-holder is a normal 200 answer with <span class="mono">holdsPassport: false</span>
+    and score 0 — not an error. Errors: 400 for a missing or malformed parameter, 404 for a
+    <span class="mono">tokenId</span> that has not been minted, 502 when every public RPC is unreachable.</p>
+  </section>
+
+  <section>
+    <h2>AgentScore — the formula</h2>
+    <div class="panel">
+      <p style="margin-top:0">AgentScore is a 0–100 activity score computed <b>only</b> from the
+      fields of <span class="mono">attributesOf(uint256)</span>. The formula is fixed and public —
+      anyone can recompute the exact same score from raw contract reads:</p>
+      <table>
+        <tr><th>Component</th><th>Points</th><th>Source field</th></tr>
+        <tr><td>Holds a passport</td><td>10</td><td class="mono">passportOf(address) != 0</td></tr>
+        <tr><td>Founder edition</td><td>10</td><td class="mono">founder</td></tr>
+        <tr><td>Level</td><td>10 per level (max 40)</td><td class="mono">level (0–4)</td></tr>
+        <tr><td>Lifetime check-ins</td><td>1 each (max 20)</td><td class="mono">checkIns</td></tr>
+        <tr><td>Best streak</td><td>1 per day (max 20)</td><td class="mono">bestStreak</td></tr>
+        <tr><td><b>Total</b></td><td><b>max 100</b></td><td>No passport = 0</td></tr>
+      </table>
+      <p class="note" style="margin-bottom:0">AgentScore measures recorded on-chain activity only.
+      It is not a financial rating, not a credit score, and it promises nothing.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Use it as a gate</h2>
+    <div class="panel">
+      <p style="margin-top:0">Example: an airdrop or mint page that requires an AgentPass at
+      level 1 or higher (best streak of 3+ days):</p>
+      <pre>const r = await fetch(
+  'https://agentpass-sigma.vercel.app/api/verify?address=' + userAddress
+);
+const v = await r.json();
+if (v.holdsPassport && v.level >= 1) {
+  // eligible — a real, active Agent ID holder
+} else {
+  // not eligible yet — point them to mint + check in
+}</pre>
+      <p><b>On-chain alternative:</b> if your gate lives inside a smart contract, skip the API
+      and read the AgentPass contract directly —
+      <span class="mono">passportOf(address)</span> (selector 0x5d1c2634) returns the tokenId
+      (0 = none), and <span class="mono">attributesOf(uint256)</span> (selector 0x09363c44)
+      returns owner, founder, streak, best streak, check-ins and level in one call.
+      Full signatures and selectors: <a href="agents.html">/agents</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>AgentPass — built for the BNB Chain Agent ID Hackathon. An independent project, not an
+    official Binance product. Activity record only; no returns or rewards are promised.
+    Source code: <a href="https://github.com/Ragilsetiyo/agentpass" target="_blank" rel="noopener">github.com/Ragilsetiyo/agentpass</a>.</p>
+  </footer>
+</div>
+</body>
+</html>

@@ -17,6 +17,7 @@ Built for the **Binance Agent ID Hackathon** (submission deadline: 9 December 20
 | Website | https://agentpass-sigma.vercel.app |
 | Machine-readable spec | https://agentpass-sigma.vercel.app/agents |
 | Public wall | https://agentpass-sigma.vercel.app/wall |
+| Verification API + AgentScore docs | https://agentpass-sigma.vercel.app/developers |
 | Source verification | **Verified on BscScan — Exact Match** · **Sourcify exact match** (creation + runtime), matchId `59525450` |
 | Deploy transaction | `0xa3501e842499801f2ad05e8eca1fd071c5ae14ce18f5e1a15ddd45f81aa3c5ad` (19 Nov 2026) |
 | Agent ID registry checked by the contract | SPACE ID Agent ID `0x60b9262456de011f7d15a54cdd8c48baaa8b022f` |
@@ -40,6 +41,29 @@ Built for the **Binance Agent ID Hackathon** (submission deadline: 9 December 20
   the agent name, level, and streak — no sealed/mystery reveal.
 - **No traps by design:** no fees, no deposits, no token approvals, no commit-reveal,
   no owner function that can change the price or sweep user assets.
+
+## Verification API & AgentScore
+
+AgentPass is built to be checked by other projects, not just looked at. A free,
+read-only verification API (no key, no signup) answers, from live on-chain reads:
+does an address hold a passport, which edition, what level, and what is its
+**AgentScore**?
+
+- By address: `GET https://agentpass-sigma.vercel.app/api/verify?address=0x…`
+- By passport: `GET https://agentpass-sigma.vercel.app/api/verify?tokenId=184`
+- Full developer documentation (real example responses, gating example):
+  https://agentpass-sigma.vercel.app/developers
+
+**AgentScore** is a 0–100 activity score computed only from the fields of
+`attributesOf(uint256)`, with a fixed public formula anyone can recompute from
+raw contract reads: **10** for holding a passport + **10** for the Founder
+edition + **10 per level** (max 40) + **1 per lifetime check-in** (max 20) +
+**1 per best-streak day** (max 20). No passport = 0. An address with no
+passport is a normal `200` answer (`holdsPassport: false`, score 0), not an
+error. Projects that need block-fresh data inside a contract can skip the API
+and call `passportOf(address)` / `attributesOf(uint256)` on-chain directly.
+The score measures recorded activity only — it is not a financial rating and
+promises nothing.
 
 ## How to mint
 

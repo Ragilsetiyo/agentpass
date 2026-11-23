@@ -21,6 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SELECTOR_ATTRIBUTES_OF = '0x09363c44'; // attributesOf(uint256)
+const SELECTOR_PASSPORT_OF = '0x5d1c2634'; // passportOf(address)
 
 const DEFAULTS = {
   project: 'AgentPass',
@@ -136,6 +137,70 @@ async function getAttributes(cfg, tokenId) {
     }
   };
 }
+
+function encodeAddress(addr) {
+  return String(addr).replace(/^0x/i, '').toLowerCase().padStart(64, '0');
+}
+
+/*
+ * Reads passportOf(address) — the tokenId of the address's passport,
+ * or 0 when the address holds none. Same result contract as getAttributes:
+ *   { ok: true, tokenId } | { ok: false, reason: 'rpc' }
+ * (passportOf never reverts for a well-formed address.)
+ */
+async function getPassportOf(cfg, address) {
+  const data = SELECTOR_PASSPORT_OF + encodeAddress(address);
+  let hex;
+  try {
+    hex = await ethCall(cfg, data);
+  } catch (e) {
+    return { ok: false, reason: 'rpc' };
+  }
+  if (!hex || hex === '0x') return { ok: false, reason: 'rpc' };
+  return { ok: true, tokenId: BigInt(hex) };
+}
+
+/*
+ * AgentScore — a 0..100 reputation score computed ONLY from the fields of
+ * attributesOf(uint256): founder, level, checkIns, bestStreak (plus the fact
+ * of holding a passport at all). The formula is fixed and public, so anyone
+ * can recompute the exact same score from raw contract reads:
+ *
+ *   passport   10 points  — the address holds a passport (soulbound, 1/address)
+ *   founder    10 points  — the passport is a Founder edition (tokenId 1..1000)
+ *   level      10 points per level (level 0..4, from best streak)  — max 40
+ *   checkIns    1 point per lifetime check-in, capped at 20        — max 20
+ *   bestStreak  1 point per day of best streak, capped at 20       — max 20
+ *   TOTAL                                                            — max 100
+ *
+ * An address with no passport scores 0. The score measures recorded on-chain
+ * activity only; it is not a financial rating and promises nothing.
+ */
+const SCORE_CAPS = { passport: 10, founder: 10, levelPerLevel: 10, checkInsCap: 20, bestStreakCap: 20 };
+
+function computeAgentScore(attrs) {
+  if (!attrs) {
+    return {
+      score: 0,
+      breakdown: { passport: 0, founder: 0, level: 0, checkIns: 0, bestStreak: 0 }
+    };
+  }
+  const breakdown = {
+    passport: SCORE_CAPS.passport,
+    founder: attrs.founder ? SCORE_CAPS.founder : 0,
+    level: Number(attrs.level) * SCORE_CAPS.levelPerLevel,
+    checkIns: Math.min(Number(attrs.checkIns), SCORE_CAPS.checkInsCap),
+    bestStreak: Math.min(Number(attrs.bestStreak), SCORE_CAPS.bestStreakCap)
+  };
+  const score = breakdown.passport + breakdown.founder + breakdown.level +
+    breakdown.checkIns + breakdown.bestStreak;
+  return { score, breakdown };
+}
+
+const SCORE_FORMULA_TEXT =
+  'AgentScore (0-100) = 10 (holds a passport) + 10 (Founder edition) + 10 per level ' +
+  '(max 40) + 1 per lifetime check-in (max 20) + 1 per best-streak day (max 20). ' +
+  'Computed only from attributesOf(uint256); no passport = 0.';
 
 function escapeXml(s) {
   return String(s)
@@ -260,10 +325,14 @@ function parseTokenId(req) {
 module.exports = {
   loadConfig,
   getAttributes,
+  getPassportOf,
+  computeAgentScore,
   buildMetadata,
   buildBadgeSvg,
   requestBaseUrl,
   parseTokenId,
   levelLabel,
-  SELECTOR_ATTRIBUTES_OF
+  SCORE_FORMULA_TEXT,
+  SELECTOR_ATTRIBUTES_OF,
+  SELECTOR_PASSPORT_OF
 };

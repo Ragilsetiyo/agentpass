@@ -17,12 +17,14 @@ the contract is deployed. Follow the order in §3 exactly.
 | `index.html` | One-page human site: what AgentPass is, how it works, live counters, contract panel, rules. English. |
 | `agents.html` (served at `/agents`) | **Machine-readable specification** for screening agents: plain-text block + embedded JSON with contract address, exact function signatures + selectors, price/quota views, opening time (ISO + unix), and rules. Live values are read from the contract in the browser when an address is configured. |
 | `wall.html` (served at `/wall`) | Public wall: `freeGiven()` / `freeRemaining()` / `totalMinted()` / `totalCheckIns()` read live via public BSC RPC, with a Founder-quota progress bar. |
+| `developers.html` (served at `/developers`) | Developer documentation for the verification API + AgentScore: endpoints, real example responses, the score formula, and how to use AgentPass as an eligibility gate. |
+| `api/verify.js` | Serverless public verification endpoint (`GET /api/verify?address=0x…` or `?tokenId=<id>`). Reads `passportOf` + `attributesOf` live from BSC and returns passport status, edition, level, streaks, check-ins and the AgentScore (0–100, fixed public formula in `api/_lib/agentpass.js`). No passport → 200 with `holdsPassport: false`, score 0. |
 | `api/token/[id].js` | Serverless ERC-721 metadata endpoint. `tokenURI(id) = baseURI + id`, so this is what the contract points at. Reads `attributesOf(id)` live from BSC and renders name, description, attributes. |
 | `api/image/[id].js` | Serverless dynamic SVG badge (`/api/image/<id>.svg`): passport number, edition, level pips, streaks, check-ins, holder. |
 | `api/_lib/agentpass.js` | Shared zero-dependency helpers: config loading, `eth_call`, ABI decoding, metadata/SVG builders. |
 | `assets/chain.js` | Zero-dependency browser helper for the static pages (config + read-only `eth_call` with RPC rotation). |
 | `site-config.json` | **The single place for post-deploy values** (see §4). Everything else reads from it. |
-| `vercel.json` | Rewrites: `/agents`, `/wall`, `/api/image/:id.svg`; cache headers for the API. |
+| `vercel.json` | Rewrites: `/agents`, `/wall`, `/developers`, `/api/image/:id.svg`; cache headers for the API. |
 | `test/run-tests.cjs` | Mock test for the metadata service — no mainnet needed (see §5). |
 
 Design rules honored everywhere: **no promises of returns, rewards, or value**

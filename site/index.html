@@ -145,6 +145,25 @@
   </section>
 
   <section>
+    <h2>AgentScore — one number for on-chain activity</h2>
+    <div class="panel">
+      <p style="margin-top:0">Every passport also carries an <b>AgentScore</b> from 0 to 100,
+      computed only from on-chain data: <b>10</b> for holding a passport, <b>10</b> for the
+      Founder edition, <b>10 per level</b> (max 40), <b>1 per check-in</b> (max 20) and
+      <b>1 per best-streak day</b> (max 20). The formula is fixed and public, so anyone —
+      including other projects — can recompute the same score from raw contract reads, or
+      simply call the free <a href="developers.html">verification API</a>.</p>
+      <p>
+        <input id="scoreInput" type="text" placeholder="Wallet address (0x…) or passport number"
+          style="width:min(430px,100%);padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:14px">
+        <button id="scoreBtn" type="button"
+          style="padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer;font-size:14px;margin-left:6px">Check score</button>
+      </p>
+      <p class="note" id="scoreResult" style="margin-bottom:0">Try it: paste any address, or a passport number like 184.</p>
+    </div>
+  </section>
+
+  <section>
     <h2>The rules, in plain terms</h2>
     <ul class="rules">
       <li><b>Free.</b> Mint and check-in cost gas only. The contract is non-payable — sending it BNB reverts.</li>
@@ -173,6 +192,8 @@
       specification — contract address, exact function signatures and selectors, price and
       quota views, opening time in ISO and unix — lives on one page that any screening agent
       can parse without guessing.</p>
+      <p>Other projects can verify any passport and read its AgentScore through the free
+      verification API — <a href="developers.html"><b>developer documentation →</b></a></p>
       <p style="margin-bottom:0"><a href="agents.html"><b>Open the /agents specification →</b></a></p>
     </div>
   </section>
@@ -246,6 +267,33 @@
         $('statusText').textContent = open ? 'mint is OPEN — free' : 'live — mint opens at the time below';
       });
   });
+
+  // --- AgentScore lookup (public verification API) ---
+  var scoreBtn = $('scoreBtn');
+  if (scoreBtn) {
+    scoreBtn.addEventListener('click', function () {
+      var q = ($('scoreInput').value || '').trim();
+      var out = $('scoreResult');
+      if (!q) { out.textContent = 'Paste a wallet address or a passport number first.'; return; }
+      var url = /^0x[0-9a-fA-F]{40}$/.test(q)
+        ? '/api/verify?address=' + q
+        : (/^\d+$/.test(q) ? '/api/verify?tokenId=' + q : null);
+      if (!url) { out.textContent = 'That does not look like a 0x address or a passport number.'; return; }
+      out.textContent = 'Reading from the contract…';
+      fetch(url).then(function (r) { return r.json(); }).then(function (v) {
+        if (!v.holdsPassport) {
+          out.textContent = 'No AgentPass passport found for that ' +
+            (url.indexOf('tokenId') > -1 ? 'number' : 'address') + ' — AgentScore 0.';
+          return;
+        }
+        out.innerHTML = 'Passport <b>#' + v.tokenId + '</b> (' + v.edition + ') — Level ' +
+          v.level + ' (' + v.levelLabel + '), best streak ' + v.bestStreak + ' days, ' +
+          v.totalCheckIns + ' check-ins. <b>AgentScore: ' + v.agentScore + ' / 100</b>';
+      }).catch(function () {
+        out.textContent = 'The verification API did not answer this time — try again.';
+      });
+    });
+  }
 })();
 </script>
 </body>
